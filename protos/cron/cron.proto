@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package cron;
+
+service Bridge {
+  rpc Dao (CronRequest) returns (CronResponse) {}
+}
+
+message CronRequest {
+	string spec = 1;//定时cron string
+	 string func =2;//函数名称
+	bytes data =3;//请求体-二进制
+}
+
+message CronResponse {
+	string status = 1;//状态
+	bytes msg =2;//返回的数据二进制
+	repeated string more =3;//数组类型返回值，可以选
+}

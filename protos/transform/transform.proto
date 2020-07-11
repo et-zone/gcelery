@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package transform;
+
+service Bridge {
+  rpc Dao (TsfRequest) returns (TsfResponse) {}
+}
+
+message TsfRequest {
+	string gtype = 1;//类型描述
+	 string method =2;//transform函数名称
+	bytes data =3;//数据
+}
+
+message TsfResponse {
+	string status = 1;//状态--不需要返回计算结果
+	
+}
