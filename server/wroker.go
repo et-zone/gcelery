@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	// "fmt"
+	"context"
 	"reflect"
 	"runtime"
 	"strings"
@@ -11,7 +12,7 @@ import (
 var globalWorker *CeleryWorker
 
 type CeleryWorker struct {
-	workerMap map[string]func([]byte) (error, []byte)
+	workerMap map[string]func(context.Context, []byte) (error, []byte)
 }
 
 func NewCeleryWorker() {
@@ -19,11 +20,11 @@ func NewCeleryWorker() {
 		return
 	}
 	worker := &CeleryWorker{}
-	worker.workerMap = make(map[string]func([]byte) (error, []byte), 0)
+	worker.workerMap = make(map[string]func(context.Context, []byte) (error, []byte), 0)
 	globalWorker = worker
 }
 
-func RegisterRpcWorker(fs ...func([]byte) (error, []byte)) error {
+func RegisterRpcWorker(fs ...func(context.Context, []byte) (error, []byte)) error {
 	if fs == nil {
 		return errors.New("RegisterWorker err,variable is null ")
 	}
@@ -46,6 +47,6 @@ func DeRegisterRpc(f func([]byte) (error, []byte)) {
 	delete(globalWorker.workerMap, list[len(list)-1])
 }
 
-func GetRpcWorker(name string) func([]byte) (error, []byte) {
+func GetRpcWorker(name string) func(context.Context, []byte) (error, []byte) {
 	return globalWorker.workerMap[name]
 }

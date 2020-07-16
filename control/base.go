@@ -14,7 +14,7 @@ type GBase struct{}
 func (s *GBase) Dao(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	// log.Printf("Received1: %v", in.Method)
 
-	err, b := s.BaseFunc(in.Data, wk.GetRpcWorker(in.Method))
+	err, b := s.BaseFunc(ctx, in.Data, wk.GetRpcWorker(in.Method))
 	if err != nil {
 		return &pb.Response{Status: "false", Msg: b}, err
 	}
@@ -29,9 +29,9 @@ func (s *GBase) Dao(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 // }
 
 //可以带参数json
-func (s *GBase) BaseFunc(b []byte, f func([]byte) (error, []byte)) (error, []byte) {
+func (s *GBase) BaseFunc(ctx context.Context, b []byte, f func(context.Context, []byte) (error, []byte)) (error, []byte) {
 	if f == nil {
 		log.Fatal("BaseFunc err, variable f eq nil")
 	}
-	return f(b)
+	return f(ctx, b)
 }
