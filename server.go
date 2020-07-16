@@ -51,12 +51,11 @@ func NewTlsGrpc(address string, cretFile string, key string) *GCeleryServer {
 
 func (this *GCeleryServer) StartCelery() {
 	if this.cronWroker != nil {
-		this.cronWroker.Start()
+		serv.StartCron(this.cronWroker)
 	}
 	if this.syncWroker != nil {
-		this.syncWroker.Start()
+		serv.StartSync(this.syncWroker)
 	}
-
 	if err := this.Server.Serve(this.listen); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

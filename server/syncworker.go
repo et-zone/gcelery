@@ -34,9 +34,14 @@ func (this *SyncWroker) RegisterWrokers(fs ...func()) {
 	}
 }
 
-func (this *SyncWroker) Start(fs ...func()) {
+func (this *SyncWroker) start() {
 	for _, fun := range this.funcs {
 		go fun()
 	}
+
+}
+
+func StartSync(syncWroker *SyncWroker) {
+	syncWroker.start()
 
 }

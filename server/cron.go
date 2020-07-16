@@ -22,12 +22,20 @@ func (this *Cron) RegisterWroker(spec string, cmd func()) (cron.EntryID, error) 
 	return this.cron.AddFunc(spec, cmd)
 }
 
-func (this *Cron) Start() {
+func (this *Cron) start() {
 	this.cron.Start()
 
 }
-func (this *Cron) Stop() {
+
+func StartCron(cron *Cron) {
+	cron.start()
+
+}
+func (this *Cron) stop() {
 	this.cron.Stop()
+}
+func StopCron(cron *Cron) {
+	cron.stop()
 }
 
 //用不上
