@@ -18,7 +18,7 @@ type GBase struct{}
 func (s *GBase) Dao(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	// log.Printf("Received1: %v", in.Method)
 
-	context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	ctx, _ = context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	err, b := s.BaseFunc(ctx, in.Data, wk.GetCeleryWorker(in.Method))
 	if err != nil {
 		return &pb.Response{Status: "false", Msg: b}, err
