@@ -13,7 +13,7 @@ type GBase struct{}
 
 func (s *GBase) Dao(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	// log.Printf("Received1: %v", in.Method)
-	log.Println("Dao=", ctx.Value())
+	log.Println("Dao=", ctx.Value("aaa"))
 	err, b := s.BaseFunc(ctx, in.Data, wk.GetRpcWorker(in.Method))
 	if err != nil {
 		return &pb.Response{Status: "false", Msg: b}, err
