@@ -14,12 +14,11 @@ func NewCron() *Cron {
 	if cro != nil {
 		return cro
 	}
-	cr := &Cron{cron: cron.New()}
-	cro = cr
+	cro = &Cron{cron: cron.New()}
 	return cro
 }
 
-func (this *Cron) AddFunc(spec string, cmd func()) (cron.EntryID, error) {
+func (this *Cron) RegisterWroker(spec string, cmd func()) (cron.EntryID, error) {
 	return this.cron.AddFunc(spec, cmd)
 }
 

@@ -11,7 +11,7 @@ import (
 
 var err error
 
-type GConnect struct {
+type CeleryClient struct {
 	conn *grpc.ClientConn
 }
 type Msg struct {
@@ -19,20 +19,20 @@ type Msg struct {
 	Message []byte `json:"message" bson:"message"`
 }
 
-func NewClient(address string) *GConnect {
-	con := &GConnect{}
+func NewClient(address string) *CeleryClient {
+	con := &CeleryClient{}
 	con.conn, err = grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	return con
 }
-func NewTlsClient(address string, certFile string) *GConnect {
+func NewTlsClient(address string, certFile string) *CeleryClient {
 	creds, err := credentials.NewClientTLSFromFile(certFile, "")
 	if err != nil {
 		log.Fatalf("could not process the credentials: %v", err)
 	}
-	con := &GConnect{}
+	con := &CeleryClient{}
 	con.conn, err = grpc.Dial(address, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.Fatal(err.Error())
@@ -40,11 +40,11 @@ func NewTlsClient(address string, certFile string) *GConnect {
 	return con
 }
 
-func (this *GConnect) CloseClient() {
+func (this *CeleryClient) CloseClient() {
 	this.conn.Close()
 }
 
-func (this *GConnect) GetCursor() *Cursor {
+func (this *CeleryClient) GetCursor() *Cursor {
 	cli := pb.NewBridgeClient(this.conn)
 
 	return &Cursor{cli}

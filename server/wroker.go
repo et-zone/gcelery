@@ -8,17 +8,17 @@ import (
 	"strings"
 )
 
-var globalWorker *RpcWorker
+var globalWorker *CeleryWorker
 
-type RpcWorker struct {
+type CeleryWorker struct {
 	workerMap map[string]func([]byte) (error, []byte)
 }
 
-func NewRpcWorker() {
+func NewCeleryWorker() {
 	if globalWorker != nil {
 		return
 	}
-	worker := &RpcWorker{}
+	worker := &CeleryWorker{}
 	worker.workerMap = make(map[string]func([]byte) (error, []byte), 0)
 	globalWorker = worker
 }

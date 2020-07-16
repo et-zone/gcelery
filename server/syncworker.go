@@ -24,14 +24,17 @@ func InitSyncWroker() *SyncWroker {
 	return syncWroker
 }
 
-func (this *SyncWroker) RegisterSyncWrokers(fs ...func()) {
+func (this *SyncWroker) Init(fs ...func()) {
+
+}
+
+func (this *SyncWroker) RegisterWrokers(fs ...func()) {
 	for _, f := range fs {
 		this.funcs = append(this.funcs, f)
 	}
 }
 
-func (this *SyncWroker) RunSyncWrokers(fs ...func()) {
-
+func (this *SyncWroker) Start(fs ...func()) {
 	for _, fun := range this.funcs {
 		go fun()
 	}

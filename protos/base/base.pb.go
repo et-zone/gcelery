@@ -8,14 +8,15 @@ package base
 
 import (
 	context "context"
+	reflect "reflect"
+	sync "sync"
+
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -290,7 +291,7 @@ func (*UnimplementedBridgeServer) Dao(context.Context, *Request) (*Response, err
 	return nil, status.Errorf(codes.Unimplemented, "method Dao not implemented")
 }
 
-func RegisterBridgeServer(s *grpc.Server, srv BridgeServer) {
+func RegisterTransport(s *grpc.Server, srv BridgeServer) {
 	s.RegisterService(&_Bridge_serviceDesc, srv)
 }
 
