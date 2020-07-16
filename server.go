@@ -13,6 +13,10 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+const (
+	Timeout = 10
+)
+
 var gserver *GCeleryServer
 
 type GCeleryServer struct {
@@ -20,6 +24,7 @@ type GCeleryServer struct {
 	listen     net.Listener
 	syncWroker *serv.SyncWroker
 	cronWroker *serv.Cron
+	timeOut    int
 }
 
 func NewCelery(address string) *GCeleryServer {
@@ -33,6 +38,7 @@ func NewCelery(address string) *GCeleryServer {
 	}
 	server.Server = grpc.NewServer()
 	server.listen = listen
+	server.timeOut = Timeout
 	gserver = server
 	return gserver
 }
@@ -49,7 +55,15 @@ func NewTlsCelery(address string, cretFile string, key string) *GCeleryServer {
 	}
 	server.Server = grpc.NewServer(grpc.Creds(creds))
 	server.listen = listen
+	server.timeOut = Timeout
 	return server
+}
+
+func (this *GCeleryServer) SetTimeout(timeout int) {
+	if timeout <= 0 {
+		return
+	}
+	this.timeOut = timeout
 }
 
 func (this *GCeleryServer) StartCelery() {
@@ -67,6 +81,8 @@ func (this *GCeleryServer) StartCelery() {
 //注册传输协议protobuf
 func (this *GCeleryServer) RegisterTransport() {
 	pb1.RegisterTransport(this.Server, &control.GBase{})
+	control.SetTimeout(this.timeOut)
+
 }
 
 func (this *GCeleryServer) RegisterCron(cronWroker *serv.Cron) {
@@ -88,7 +104,7 @@ func (this *GCeleryServer) InitCelery() {
 }
 
 func (this *GCeleryServer) RegisterCeleryWorker(fs ...func(context.Context, []byte) (error, []byte)) {
-	serv.RegisterRpcWorker(fs...)
+	serv.RegisterCeleryWorker(fs...)
 }
 
 //cron

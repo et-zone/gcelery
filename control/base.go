@@ -5,16 +5,21 @@ import (
 	// "fmt"
 	"log"
 
+	"time"
+
 	pb "github.com/et-zone/gcelery/protos/base"
 	wk "github.com/et-zone/gcelery/server"
 )
+
+var timeout int
 
 type GBase struct{}
 
 func (s *GBase) Dao(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	// log.Printf("Received1: %v", in.Method)
-	log.Println("Dao=", ctx.Value("aaa"))
-	err, b := s.BaseFunc(ctx, in.Data, wk.GetRpcWorker(in.Method))
+
+	context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	err, b := s.BaseFunc(ctx, in.Data, wk.GetCeleryWorker(in.Method))
 	if err != nil {
 		return &pb.Response{Status: "false", Msg: b}, err
 	}
@@ -34,4 +39,8 @@ func (s *GBase) BaseFunc(ctx context.Context, b []byte, f func(context.Context, 
 		log.Fatal("BaseFunc err, variable f eq nil")
 	}
 	return f(ctx, b)
+}
+
+func SetTimeout(timeout int) {
+	timeout = timeout
 }

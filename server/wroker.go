@@ -24,7 +24,7 @@ func NewCeleryWorker() {
 	globalWorker = worker
 }
 
-func RegisterRpcWorker(fs ...func(context.Context, []byte) (error, []byte)) error {
+func RegisterCeleryWorker(fs ...func(context.Context, []byte) (error, []byte)) error {
 	if fs == nil {
 		return errors.New("RegisterWorker err,variable is null ")
 	}
@@ -47,6 +47,6 @@ func DeRegisterRpc(f func([]byte) (error, []byte)) {
 	delete(globalWorker.workerMap, list[len(list)-1])
 }
 
-func GetRpcWorker(name string) func(context.Context, []byte) (error, []byte) {
+func GetCeleryWorker(name string) func(context.Context, []byte) (error, []byte) {
 	return globalWorker.workerMap[name]
 }
