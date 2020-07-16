@@ -34,7 +34,8 @@ func NewCelery(address string) *GCeleryServer {
 	gserver = server
 	return gserver
 }
-func NewTlsGrpc(address string, cretFile string, key string) *GCeleryServer {
+
+func NewTlsCelery(address string, cretFile string, key string) *GCeleryServer {
 	creds, err := credentials.NewServerTLSFromFile(cretFile, key)
 	if err != nil {
 		log.Fatalf("Failed to setup TLS: %v", err)
@@ -98,12 +99,12 @@ func (this *GCeleryServer) NewSyncWroker() *serv.SyncWroker {
 	return serv.InitSyncWroker()
 }
 
-//client
-func NewClient(bindaddr string) *serv.CeleryClient {
-	return serv.NewClient(bindaddr)
+//client Pool
+func NewClientPool(max int, bindaddr string) *serv.CliPool {
+	return serv.InitClientPool(max, bindaddr)
 }
 
 //client
-func NewTlsClient(bindaddr string, certFile string) *serv.CeleryClient {
-	return serv.NewTlsClient(bindaddr, certFile)
+func NewSTLClientPool(max int, bindaddr string, certFile string) *serv.CliPool {
+	return serv.InitSTLClientPool(max, bindaddr, certFile)
 }
