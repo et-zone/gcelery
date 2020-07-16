@@ -45,6 +45,10 @@ func (this *Cursor) DoContext(ctx context.Context, method string, data []byte, a
 	})
 	if err != nil {
 		log.Println(err.Error())
+		return Msg{
+			Status:  "false",
+			Message: []byte{},
+		}
 	}
 	msg := Msg{
 		Status:  r.Status,
