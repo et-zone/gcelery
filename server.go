@@ -4,6 +4,8 @@ import (
 	"log"
 	"net"
 
+	"context"
+
 	"github.com/et-zone/gcelery/control"
 	pb1 "github.com/et-zone/gcelery/protos/base"
 	serv "github.com/et-zone/gcelery/server"
@@ -85,7 +87,7 @@ func (this *GCeleryServer) InitCelery() {
 	serv.NewCeleryWorker()
 }
 
-func (this *GCeleryServer) RegisterCeleryWorker(fs ...func([]byte) (error, []byte)) {
+func (this *GCeleryServer) RegisterCeleryWorker(fs ...func(context.Context, []byte) (error, []byte)) {
 	serv.RegisterRpcWorker(fs...)
 }
 
