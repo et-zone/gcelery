@@ -6,12 +6,14 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+
+	"github.com/et-zone/gcelery/task"
 )
 
 var globalWorker *CeleryWorker
 
 type CeleryWorker struct {
-	workerMap map[string]func(*Request) (error, *Response)
+	workerMap map[string]func(*task.Request) (error, *task.Response)
 }
 
 func NewCeleryWorker() {
@@ -19,11 +21,11 @@ func NewCeleryWorker() {
 		return
 	}
 	worker := &CeleryWorker{}
-	worker.workerMap = make(map[string]func(*Request) (error, *Response), 0)
+	worker.workerMap = make(map[string]func(*task.Request) (error, *task.Response), 0)
 	globalWorker = worker
 }
 
-func RegisterCeleryWorker(fs ...func(*Request) (error, *Response)) error {
+func RegisterCeleryWorker(fs ...func(*task.Request) (error, *task.Response)) error {
 	if fs == nil {
 		return errors.New("RegisterWorker err,variable is null ")
 	}
@@ -46,6 +48,6 @@ func DeRegisterRpc(f func([]byte) (error, []byte)) {
 	delete(globalWorker.workerMap, list[len(list)-1])
 }
 
-func GetCeleryWorker(name string) func(*Request) (error, *Response) {
+func GetCeleryWorker(name string) func(*task.Request) (error, *task.Response) {
 	return globalWorker.workerMap[name]
 }

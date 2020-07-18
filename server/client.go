@@ -9,8 +9,9 @@ import (
 
 	"context"
 
-	"github.com/et-zone/gcelery/control"
+	// "github.com/et-zone/gcelery/control"
 	pb "github.com/et-zone/gcelery/protos/base"
+	"github.com/et-zone/gcelery/task"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -148,7 +149,7 @@ type Cursor struct {
 	client *CeleryClient
 }
 
-func (this *Cursor) Do(req *control.Request) control.Response {
+func (this *Cursor) Do(req *task.Request) task.Response {
 	if this == nil {
 		log.Fatal("Do err, Cursor is nil can not Do function ")
 	}
@@ -161,19 +162,19 @@ func (this *Cursor) Do(req *control.Request) control.Response {
 	if err != nil {
 		// log.Println(err.Error())
 		if strings.Contains(err.Error(), "DeadlineExceeded") {
-			return control.GetErrResponse(control.RES_TIMEOUT_ERR)
+			return task.GetErrResponse(task.RES_TIMEOUT_ERR)
 		} else if strings.Contains(err.Error(), "Unavailable") {
-			return control.GetErrResponse(control.UKNOWN_ERR)
+			return task.GetErrResponse(task.UKNOWN_ERR)
 		} else {
-			return control.GetErrResponse(err.Error())
+			return task.GetErrResponse(err.Error())
 		}
 	}
 
-	return control.GetResponse(r)
+	return task.GetResponse(r)
 }
 
 //自定义控制程context
-func (this *Cursor) DoContext(ctx context.Context, req *control.Request) control.Response {
+func (this *Cursor) DoContext(ctx context.Context, req *task.Request) task.Response {
 	if this == nil {
 		log.Fatal("Do err, Cursor is nil can not Do function ")
 	}
@@ -186,16 +187,16 @@ func (this *Cursor) DoContext(ctx context.Context, req *control.Request) control
 	if err != nil {
 		// log.Println(err.Error())
 		if strings.Contains(err.Error(), "DeadlineExceeded") {
-			return control.GetErrResponse(control.RES_TIMEOUT_ERR)
+			return task.GetErrResponse(task.RES_TIMEOUT_ERR)
 		} else if strings.Contains(err.Error(), "Unavailable") {
-			return control.GetErrResponse(control.UKNOWN_ERR)
+			return task.GetErrResponse(task.UKNOWN_ERR)
 		} else {
-			return control.GetErrResponse(err.Error())
+			return task.GetErrResponse(err.Error())
 		}
 
 	}
 
-	return control.GetResponse(r)
+	return task.GetResponse(r)
 }
 
 func (this *Cursor) Close() {

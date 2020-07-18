@@ -9,6 +9,7 @@ import (
 	"github.com/et-zone/gcelery/control"
 	pb1 "github.com/et-zone/gcelery/protos/base"
 	serv "github.com/et-zone/gcelery/server"
+	"github.com/et-zone/gcelery/task"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -103,7 +104,7 @@ func (this *GCeleryServer) InitCelery() {
 	control.NewCeleryWorker()
 }
 
-func (this *GCeleryServer) RegisterCeleryWorker(fs ...func(*control.Request) (error, *control.Response)) {
+func (this *GCeleryServer) RegisterCeleryWorker(fs ...func(*task.Request) (error, *task.Response)) {
 	control.RegisterCeleryWorker(fs...)
 }
 
@@ -128,6 +129,6 @@ func NewSTLClientPool(max int, bindaddr string, certFile string) *serv.CliPool {
 }
 
 //Request
-func NewResQuest() *control.Request {
-	return control.NewResQuest()
+func NewResQuest() *task.Request {
+	return task.NewResQuest()
 }
