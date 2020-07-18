@@ -4,7 +4,7 @@ import (
 	"log"
 	"net"
 
-	"context"
+	// "time"
 
 	"github.com/et-zone/gcelery/control"
 	pb1 "github.com/et-zone/gcelery/protos/base"
@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Timeout = 10
+	TIMEOUT = 10
 )
 
 var gserver *GCeleryServer
@@ -24,7 +24,7 @@ type GCeleryServer struct {
 	listen     net.Listener
 	syncWroker *serv.SyncWroker
 	cronWroker *serv.Cron
-	timeOut    int
+	// timeOut    int
 }
 
 func NewCelery(address string) *GCeleryServer {
@@ -36,9 +36,10 @@ func NewCelery(address string) *GCeleryServer {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	//grpc.ConnectionTimeout(time.Duration(5)) connectionTimeout,default=120s
 	server.Server = grpc.NewServer()
 	server.listen = listen
-	server.timeOut = Timeout
+	// server.timeOut = TIMEOUT
 	gserver = server
 	return gserver
 }
@@ -55,16 +56,16 @@ func NewTlsCelery(address string, cretFile string, key string) *GCeleryServer {
 	}
 	server.Server = grpc.NewServer(grpc.Creds(creds))
 	server.listen = listen
-	server.timeOut = Timeout
+	// server.timeOut = TIMEOUT
 	return server
 }
 
-func (this *GCeleryServer) SetTimeout(timeout int) {
-	if timeout <= 0 {
-		return
-	}
-	this.timeOut = timeout
-}
+// func (this *GCeleryServer) SetTimeout(timeout int) {
+// 	if timeout <= 0 {
+// 		return
+// 	}
+// 	this.timeOut = timeout
+// }
 
 func (this *GCeleryServer) StartCelery() {
 	if this.cronWroker != nil {
@@ -80,8 +81,7 @@ func (this *GCeleryServer) StartCelery() {
 
 //注册传输协议protobuf
 func (this *GCeleryServer) RegisterTransport() {
-	pb1.RegisterTransport(this.Server, &control.GBase{})
-	control.SetTimeout(this.timeOut)
+	pb1.RegisterBridgeServer(this.Server, &control.GBase{})
 
 }
 
@@ -100,11 +100,11 @@ func (this *GCeleryServer) RegisterSync(SyncWroker *serv.SyncWroker) {
 
 //grpc worker
 func (this *GCeleryServer) InitCelery() {
-	serv.NewCeleryWorker()
+	control.NewCeleryWorker()
 }
 
-func (this *GCeleryServer) RegisterCeleryWorker(fs ...func(context.Context, []byte) (error, []byte)) {
-	serv.RegisterCeleryWorker(fs...)
+func (this *GCeleryServer) RegisterCeleryWorker(fs ...func(*control.Request) (error, *control.Response)) {
+	control.RegisterCeleryWorker(fs...)
 }
 
 //cron
@@ -125,4 +125,9 @@ func NewClientPool(max int, bindaddr string) *serv.CliPool {
 //client
 func NewSTLClientPool(max int, bindaddr string, certFile string) *serv.CliPool {
 	return serv.InitSTLClientPool(max, bindaddr, certFile)
+}
+
+//Request
+func NewResQuest() *control.Request {
+	return control.NewResQuest()
 }

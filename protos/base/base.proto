@@ -9,13 +9,29 @@ service Bridge {
 
 message Request {
 	string method = 1;//方法
-	repeated string args =2;//请求参数
-	bytes data =3;//请求体-二进制
+	map<string,string> kwargs =2;
+	bytes reqBody =3;//请求体-二进制
 }
 
+
 message Response {
-	string status = 1;//状态
-	bytes msg =2;//返回的数据二进制
-	
+	bool isOk =1;
+	string status = 2;//状态
+	map<string,string> kValue=3 ;
+	bytes resBody =4;//返回的数据二进制	
 }
 //repeated string more =3;//数组类型返回值，可以选 不需要
+
+//message GCeleryRequest {
+//	string method = 1;//方法
+//	map<string,string> kwargs =2;
+//	bytes reqBody =3;//请求体-二进制
+//}
+
+
+//message GCeleryResponse {
+//	bool isOk =1;
+//	string status = 2;//状态
+//	map<string,string> kValue=3 ;
+//	bytes resBody =4;//返回的数据二进制	
+//}

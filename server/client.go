@@ -2,14 +2,21 @@ package server
 
 import (
 	"log"
+	"strings"
 	"sync"
 
+	// "time"
+
+	"context"
+
+	"github.com/et-zone/gcelery/control"
 	pb "github.com/et-zone/gcelery/protos/base"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
 var cliPool *CliPool
+var err error
 
 type CeleryClient struct {
 	conn *grpc.ClientConn
@@ -23,13 +30,14 @@ type CliPool struct {
 	certFile string //cert文件路径
 }
 
-type Msg struct {
-	Status  string `json:"status" bson:"status"`
-	Message []byte `json:"message" bson:"message"`
-}
+// type Msg struct {
+// 	Status  string `json:"status" bson:"status"`
+// 	Message []byte `json:"message" bson:"message"`
+// }
 
 func NewClient(address string) *CeleryClient {
 	con := &CeleryClient{}
+	//, grpc.WithTimeout(time.Duration(10)*time.Second) client
 	con.conn, err = grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err.Error())
@@ -132,4 +140,69 @@ func (clipool *CliPool) ClosePool() {
 		}
 	}
 
+}
+
+//cursor
+type Cursor struct {
+	cursor pb.BridgeClient
+	client *CeleryClient
+}
+
+func (this *Cursor) Do(req *control.Request) control.Response {
+	if this == nil {
+		log.Fatal("Do err, Cursor is nil can not Do function ")
+	}
+
+	r, err := this.cursor.Dao(context.TODO(), &pb.Request{ //context.TODO()==default
+		Method:  req.Method,
+		ReqBody: req.ReqBody,
+		Kwargs:  req.Kwargs,
+	})
+	if err != nil {
+		// log.Println(err.Error())
+		if strings.Contains(err.Error(), "DeadlineExceeded") {
+			return control.GetErrResponse(control.RES_TIMEOUT_ERR)
+		} else if strings.Contains(err.Error(), "Unavailable") {
+			return control.GetErrResponse(control.UKNOWN_ERR)
+		} else {
+			return control.GetErrResponse(err.Error())
+		}
+	}
+
+	return control.GetResponse(r)
+}
+
+//自定义控制程context
+func (this *Cursor) DoContext(ctx context.Context, req *control.Request) control.Response {
+	if this == nil {
+		log.Fatal("Do err, Cursor is nil can not Do function ")
+	}
+
+	r, err := this.cursor.Dao(ctx, &pb.Request{
+		Method:  req.Method,
+		ReqBody: req.ReqBody,
+		Kwargs:  req.Kwargs,
+	})
+	if err != nil {
+		// log.Println(err.Error())
+		if strings.Contains(err.Error(), "DeadlineExceeded") {
+			return control.GetErrResponse(control.RES_TIMEOUT_ERR)
+		} else if strings.Contains(err.Error(), "Unavailable") {
+			return control.GetErrResponse(control.UKNOWN_ERR)
+		} else {
+			return control.GetErrResponse(err.Error())
+		}
+
+	}
+
+	return control.GetResponse(r)
+}
+
+func (this *Cursor) Close() {
+	if cliPool == nil {
+		log.Println("Close Cursor err , not found CliPool")
+		return
+	}
+	cliPool.Put(this.client)
+	this = nil
 }

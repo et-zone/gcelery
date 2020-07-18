@@ -1,67 +1,35 @@
 package server
 
-import (
-	"context"
-	"log"
+// "context"
 
-	pb "github.com/et-zone/gcelery/protos/base"
-)
+// "github.com/et-zone/gcelery/protos/base"
 
-var err error
+// const (
+// 	RES_TIMEOUT_ERR = "TimeOutError"
+// 	UKNOWN_ERR      = "UnKnownError"
+// )
 
-//cursor
-type Cursor struct {
-	cursor pb.BridgeClient
-	client *CeleryClient
-}
+// type Context struct {
+// 	context  context.Context
+// 	Request  Request
+// 	Response Response
+// 	timeout  int
+// }
 
-func (this *Cursor) Do(method string, data []byte, args ...string) Msg {
-	if this == nil {
-		log.Fatal("Do err, Cursor is nil can not Do function ")
-	}
-	r, err := this.cursor.Dao(context.TODO(), &pb.Request{ //context.TODO()
-		Method: method,
-		Data:   data,
-		Args:   args,
-	})
-	if err != nil {
-		log.Println(err.Error())
-	}
-	msg := Msg{
-		Status:  r.Status,
-		Message: r.Msg,
-	}
-	return msg
-}
+// type Request struct {
+// 	Args    []string               `bson:"args" json:"args"`
+// 	Wwargs  map[string]interface{} `bson:"kwargs" json:"kwargs"`
+// 	ReqBody []byte                 `bson:"reqbody" json:"reqbody"`
+// }
+// type Response struct {
+// 	IsOk    bool   `bson:"isok" json:"isok"`
+// 	Status  string `bson:"status" json:"status"`
+// 	ResBody []byte `bson:"resbody" json:"resbody"`
+// }
 
-func (this *Cursor) DoContext(ctx context.Context, method string, data []byte, args ...string) Msg {
-	if this == nil {
-		log.Fatal("Do err, Cursor is nil can not Do function ")
-	}
-	r, err := this.cursor.Dao(ctx, &pb.Request{ //context.TODO()
-		Method: method,
-		Data:   data,
-		Args:   args,
-	})
-	if err != nil {
-		log.Println(err.Error())
-		return Msg{
-			Status:  "false",
-			Message: []byte{},
-		}
-	}
-	msg := Msg{
-		Status:  r.Status,
-		Message: r.Msg,
-	}
-	return msg
-}
-
-func (this *Cursor) Close() {
-	if cliPool == nil {
-		log.Println("Close Cursor err , not found CliPool")
-		return
-	}
-	cliPool.Put(this.client)
-	this = nil
-}
+// type Context struct {
+// 	context  context.Context
+// 	Request  base.Request
+// 	Response base.Response
+// 	timeout  int
+// }
