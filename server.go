@@ -123,12 +123,22 @@ func NewClientPool(max int, bindaddr string) *serv.CliPool {
 	return serv.InitClientPool(max, bindaddr)
 }
 
-//client
+// client One
+func NewClient(bindaddr string) *serv.CeleryClient {
+	return serv.NewClient(bindaddr)
+}
+
+//client STL Pool
 func NewSTLClientPool(max int, bindaddr string, certFile string) *serv.CliPool {
 	return serv.InitSTLClientPool(max, bindaddr, certFile)
 }
 
+//client One STL
+func NewSTLClient(bindaddr string, certFile string) *serv.CeleryClient {
+	return serv.NewTlsClient(bindaddr, certFile)
+}
+
 //Request
-func NewResQuest() *task.Request {
-	return task.NewResQuest()
+func NewTaskResquest() *task.Request {
+	return task.NewResquest()
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	// "time"
+	"time"
 
 	"context"
 
@@ -19,22 +19,27 @@ import (
 var cliPool *CliPool
 var err error
 
+const TimeOut = 60
+
 type CeleryClient struct {
-	conn *grpc.ClientConn
+	conn    *grpc.ClientConn
+	timeout int
+	isnew   bool
 }
 
 type CliPool struct {
+	sync.Mutex
 	sync.Pool
-	Maxconn  int //连接数
-	Address  string
-	isSTL    bool
-	certFile string //cert文件路径
-}
+	Maxconn     int    //连接数
+	Address     string //
+	isSTL       bool   //stl
+	certFile    string //cert文件路径
+	timeout     int    //超时时间
+	MaxIdleConn int    //最大连接数
+	MinOpenConn int    //最小存活数
+	LocalConn   int    //当前连接数
 
-// type Msg struct {
-// 	Status  string `json:"status" bson:"status"`
-// 	Message []byte `json:"message" bson:"message"`
-// }
+}
 
 func NewClient(address string) *CeleryClient {
 	con := &CeleryClient{}
@@ -58,7 +63,7 @@ func NewTlsClient(address string, certFile string) *CeleryClient {
 	return con
 }
 
-//初始化client连接池
+//init client Pool
 func InitClientPool(max int, addr string) *CliPool {
 	if max <= 0 {
 		panic("initClientPool err, Maxconn can not < 0")
@@ -70,10 +75,13 @@ func InitClientPool(max int, addr string) *CliPool {
 		New: func() interface{} {
 			return nil
 		}},
+		Mutex:   sync.Mutex{},
 		Maxconn: max,
 		Address: addr,
 		isSTL:   false,
+		timeout: TimeOut,
 	}
+
 	for i := 0; i < cliPool.Maxconn; i++ {
 		cliPool.Put(func() interface{} {
 			return NewClient(cliPool.Address)
@@ -83,9 +91,12 @@ func InitClientPool(max int, addr string) *CliPool {
 	return cliPool
 }
 
-//初始化STL client连接池
+//init STL client Pool
 func InitSTLClientPool(max int, addr string, certFile string) *CliPool {
 	if max <= 0 {
+
+	}
+	if max > 50 {
 		panic("initClientPool err, Maxconn can not < 0")
 	}
 	if cliPool != nil {
@@ -95,10 +106,12 @@ func InitSTLClientPool(max int, addr string, certFile string) *CliPool {
 		New: func() interface{} {
 			return nil
 		}},
+		Mutex:    sync.Mutex{},
 		Maxconn:  max,
 		Address:  addr,
 		isSTL:    true,
 		certFile: certFile,
+		timeout:  TimeOut,
 	}
 
 	for i := 0; i < cliPool.Maxconn; i++ {
@@ -115,18 +128,21 @@ func (clipool *CliPool) GetCursor() *Cursor {
 	if !isok { //新增一个
 		if clipool.isSTL == true {
 			client := NewTlsClient(cliPool.Address, clipool.certFile)
+			client.timeout = clipool.timeout
 			cli := pb.NewBridgeClient(client.conn)
-			return &Cursor{cli, client}
+			return &Cursor{cli, client, true}
 		} else {
 			client := NewClient(cliPool.Address)
+			client.timeout = clipool.timeout
 			cli := pb.NewBridgeClient(client.conn)
-			return &Cursor{cli, client}
+			return &Cursor{cli, client, true}
 		}
 
 	}
+	client.timeout = clipool.timeout
 	cli := pb.NewBridgeClient(client.conn)
 
-	return &Cursor{cli, client}
+	return &Cursor{cli, client, true}
 }
 
 func (clipool *CliPool) ClosePool() {
@@ -143,18 +159,27 @@ func (clipool *CliPool) ClosePool() {
 
 }
 
+//SetClient Timeout default 60s
+func (clipool *CliPool) SetTimeOut(timeout int) {
+	if timeout <= 0 {
+		log.Println("set timeout ,timeout can not <= 0")
+	}
+	cliPool.timeout = timeout
+}
+
 //cursor
 type Cursor struct {
-	cursor pb.BridgeClient
-	client *CeleryClient
+	cursor       pb.BridgeClient
+	client       *CeleryClient
+	isPoolCursor bool
 }
 
 func (this *Cursor) Do(req *task.Request) task.Response {
 	if this == nil {
 		log.Fatal("Do err, Cursor is nil can not Do function ")
 	}
-
-	r, err := this.cursor.Dao(context.TODO(), &pb.Request{ //context.TODO()==default
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(this.client.timeout))
+	r, err := this.cursor.Dao(ctx, &pb.Request{ //context.TODO()==default
 		Method:  req.Method,
 		ReqBody: req.ReqBody,
 		Kwargs:  req.Kwargs,
@@ -162,19 +187,27 @@ func (this *Cursor) Do(req *task.Request) task.Response {
 	if err != nil {
 		// log.Println(err.Error())
 		if strings.Contains(err.Error(), "DeadlineExceeded") {
-			return task.GetErrResponse(task.RES_TIMEOUT_ERR)
-		} else if strings.Contains(err.Error(), "Unavailable") {
-			return task.GetErrResponse(task.UKNOWN_ERR)
+			return task.SetResponseWithStatus(task.RES_TIMEOUT_ERR)
 		} else {
-			return task.GetErrResponse(err.Error())
+			return task.SetResponseWithStatus(err.Error())
 		}
 	}
 
-	return task.GetResponse(r)
+	return task.GetPdResponse(r)
 }
 
-//自定义控制程context
-func (this *Cursor) DoContext(ctx context.Context, req *task.Request) task.Response {
+/*
+exampel:
+	自定义控制程context 超时时间
+	// ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(5))
+	// ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+	// ctx, cancel := context.WithCancel(context.Background()) //程序退出才会走下一步
+	// defer cancel()
+	// msg := cursor.DoContext(ctx, req)
+
+*/
+//自定义控制程context 暂时没必要，因为已经可以设置自定义超时时间了，暂且环比该函数
+func (this *Cursor) doContext(ctx context.Context, req *task.Request) task.Response {
 	if this == nil {
 		log.Fatal("Do err, Cursor is nil can not Do function ")
 	}
@@ -187,23 +220,67 @@ func (this *Cursor) DoContext(ctx context.Context, req *task.Request) task.Respo
 	if err != nil {
 		// log.Println(err.Error())
 		if strings.Contains(err.Error(), "DeadlineExceeded") {
-			return task.GetErrResponse(task.RES_TIMEOUT_ERR)
-		} else if strings.Contains(err.Error(), "Unavailable") {
-			return task.GetErrResponse(task.UKNOWN_ERR)
+			return task.SetResponseWithStatus(task.RES_TIMEOUT_ERR)
 		} else {
-			return task.GetErrResponse(err.Error())
+			return task.SetResponseWithStatus(err.Error())
 		}
 
 	}
 
-	return task.GetResponse(r)
+	return task.GetPdResponse(r)
 }
 
 func (this *Cursor) Close() {
-	if cliPool == nil {
-		log.Println("Close Cursor err , not found CliPool")
+
+	if this.isPoolCursor == true {
+		if cliPool == nil {
+			log.Println("Close Cursor err , not found CliPool")
+			return
+		}
+		cliPool.Put(this.client)
+	}
+	this = nil
+}
+
+func (celeryClient *CeleryClient) Close() {
+	if celeryClient == nil {
+		log.Println("client err  client==nil can not Close")
 		return
 	}
-	cliPool.Put(this.client)
-	this = nil
+	err := celeryClient.conn.Close()
+	if err != nil {
+		log.Println(err.Error())
+	}
+}
+
+func (celeryClient *CeleryClient) GetCursor() *Cursor {
+	if celeryClient == nil {
+		log.Println("client err  client==nil can not get Cursor")
+		return nil
+	}
+	celeryClient.timeout = TimeOut //default
+	cli := pb.NewBridgeClient(celeryClient.conn)
+
+	return &Cursor{cli, celeryClient, false}
+}
+
+//SetClient Timeout default 60s
+func (celeryClient *CeleryClient) SetTimeOut(timeout int) {
+	if timeout <= 0 {
+		log.Println("set timeout ,timeout can not <= 0")
+	}
+	celeryClient.timeout = timeout
+}
+
+//client init potion,  not used
+type CliOption struct {
+	name  string
+	value interface{}
+}
+
+func NewCliOpt(argName string, val interface{}) CliOption {
+	return CliOption{
+		name:  argName,
+		value: val,
+	}
 }
