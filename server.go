@@ -119,23 +119,13 @@ func (this *GCeleryServer) NewSyncWroker() *serv.SyncWroker {
 }
 
 //client Pool
-func NewClientPool(max int, bindaddr string) *serv.CliPool {
-	return serv.InitClientPool(max, bindaddr)
-}
-
-// client One
 func NewClient(bindaddr string) *serv.CeleryClient {
-	return serv.NewClient(bindaddr)
+	return serv.InitClient(bindaddr)
 }
 
-//client STL Pool
-func NewSTLClientPool(max int, bindaddr string, certFile string) *serv.CliPool {
-	return serv.InitSTLClientPool(max, bindaddr, certFile)
-}
-
-//client One STL
+//client One STL Pool
 func NewSTLClient(bindaddr string, certFile string) *serv.CeleryClient {
-	return serv.NewTlsClient(bindaddr, certFile)
+	return serv.InitSTLClient(bindaddr, certFile)
 }
 
 //Request
