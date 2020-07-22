@@ -132,3 +132,9 @@ func NewSTLClient(bindaddr string, certFile string) *serv.CeleryClient {
 func NewTaskResquest() *task.Request {
 	return task.NewResquest()
 }
+
+//cursor
+func NewCurSor(addr string) serv.Cursor {
+	return serv.NewCurSor(addr)
+
+}
