@@ -37,14 +37,14 @@ func (this *cursor) Do(req *task.Request) task.Response {
 	if this == nil {
 		log.Fatal("Do err, Cursor is nil can not Do function ")
 	}
-	t := time.Now()
+	// t := time.Now()
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(this.timeout))
 	r, err := this.cursor.Dao(ctx, &pb.Request{ //context.TODO()==default
 		Method:  req.Method,
 		ReqBody: req.ReqBody,
 		Kwargs:  req.Kwargs,
 	})
-	log.Println(time.Since(t))
+	// log.Println(time.Since(t))
 	if err != nil {
 		// log.Println(err.Error())
 		if strings.Contains(err.Error(), "DeadlineExceeded") {
