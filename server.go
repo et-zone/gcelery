@@ -134,7 +134,7 @@ func NewTaskResquest() *task.Request {
 }
 
 //cursor
-func NewCurSor(addr string) serv.Cursor {
-	return serv.NewCurSor(addr)
+// func NewCurSor(addr string) serv.Cursor {
+// 	return serv.NewCurSor(addr)
 
-}
+// }

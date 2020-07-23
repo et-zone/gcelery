@@ -9,17 +9,17 @@ import (
 
 	pb "github.com/et-zone/gcelery/protos/base"
 	"github.com/et-zone/gcelery/task"
-	"google.golang.org/grpc"
+	// "google.golang.org/grpc"
 )
 
-func NewCurSor(addr string) Cursor {
-	c := &cursor{
-		conn: newConn(addr),
-	}
-	c.cursor = pb.NewBridgeClient(c.conn)
-	c.timeout = 5
-	return c
-}
+// func NewCurSor(addr string) Cursor {
+// 	c := &cursor{
+// 		conn: newConn(addr),
+// 	}
+// 	c.cursor = pb.NewBridgeClient(c.conn)
+// 	c.timeout = 5
+// 	return c
+// }
 
 type Cursor interface {
 	Do(req *task.Request) task.Response
@@ -28,8 +28,8 @@ type Cursor interface {
 
 //cursor
 type cursor struct {
-	cursor  pb.BridgeClient
-	conn    *grpc.ClientConn
+	cursor pb.BridgeClient
+	// conn    *grpc.ClientConn
 	timeout int
 }
 
@@ -37,12 +37,14 @@ func (this *cursor) Do(req *task.Request) task.Response {
 	if this == nil {
 		log.Fatal("Do err, Cursor is nil can not Do function ")
 	}
+	t := time.Now()
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(this.timeout))
 	r, err := this.cursor.Dao(ctx, &pb.Request{ //context.TODO()==default
 		Method:  req.Method,
 		ReqBody: req.ReqBody,
 		Kwargs:  req.Kwargs,
 	})
+	log.Println(time.Since(t))
 	if err != nil {
 		// log.Println(err.Error())
 		if strings.Contains(err.Error(), "DeadlineExceeded") {

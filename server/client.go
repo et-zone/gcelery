@@ -150,7 +150,7 @@ func (cli *CeleryClient) Clone() *CeleryClient {
 		conn:    cli.pool.conn,
 		timeout: cli.pool.timeout,
 		pool:    nil,
-		Cursor:  &cursor{pb.NewBridgeClient(client.pool.conn), client.pool.conn, client.pool.timeout},
+		Cursor:  &cursor{pb.NewBridgeClient(client.pool.conn), client.pool.timeout},
 	}
 	return client
 

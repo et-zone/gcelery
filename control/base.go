@@ -2,6 +2,8 @@ package control
 
 import (
 	"context"
+	"time"
+
 	// "fmt"
 	"log"
 
@@ -11,13 +13,16 @@ import (
 	// wk "github.com/et-zone/gcelery/server"
 )
 
-type GBase struct{}
+type GBase struct {
+	// pb.UnimplementedBridgeServer
+}
 
 func (s *GBase) Dao(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	// log.Printf("Received1: %v", in.Method)
 	// ctx, _ = context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
-
+	t := time.Now()
 	err, b := s.BaseFunc(in, GetCeleryWorker(in.Method))
+	log.Println(time.Since(t))
 	if err != nil {
 		return &pb.Response{Status: "false", ResBody: b.ResBody}, err
 	}
