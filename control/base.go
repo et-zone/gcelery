@@ -2,15 +2,10 @@ package control
 
 import (
 	"context"
-	// "time"
-
-	// "fmt"
 	"log"
 
-	// "time"
 	pb "github.com/et-zone/gcelery/protos/base"
 	"github.com/et-zone/gcelery/task"
-	// wk "github.com/et-zone/gcelery/server"
 )
 
 type GBase struct {
@@ -31,12 +26,12 @@ func (s *GBase) Dao(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 
 }
 
-// 不带参数
+// Without Args
 // func (s *GBase) BaseFunc(f func() error) error {
 // 	return f()
 // }
 
-//可以带参数json
+// Have  Args
 func (s *GBase) BaseFunc(r *pb.Request, f func(*task.Request) (error, *task.Response)) (error, *task.Response) {
 	if f == nil {
 		log.Fatal("BaseFunc err, variable f eq nil")

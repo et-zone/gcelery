@@ -25,9 +25,9 @@ type GCeleryServer struct {
 	listen     net.Listener
 	syncWroker *serv.SyncWroker
 	cronWroker *serv.Cron
-	// timeOut    int
 }
 
+//New Server
 func NewCelery(address string) *GCeleryServer {
 	if gserver != nil {
 		return gserver
@@ -40,11 +40,11 @@ func NewCelery(address string) *GCeleryServer {
 	//grpc.ConnectionTimeout(time.Duration(5)) connectionTimeout,default=120s
 	server.Server = grpc.NewServer()
 	server.listen = listen
-	// server.timeOut = TIMEOUT
 	gserver = server
 	return gserver
 }
 
+//New TLS Server
 func NewTlsCelery(address string, cretFile string, key string) *GCeleryServer {
 	creds, err := credentials.NewServerTLSFromFile(cretFile, key)
 	if err != nil {
@@ -57,17 +57,10 @@ func NewTlsCelery(address string, cretFile string, key string) *GCeleryServer {
 	}
 	server.Server = grpc.NewServer(grpc.Creds(creds))
 	server.listen = listen
-	// server.timeOut = TIMEOUT
 	return server
 }
 
-// func (this *GCeleryServer) SetTimeout(timeout int) {
-// 	if timeout <= 0 {
-// 		return
-// 	}
-// 	this.timeOut = timeout
-// }
-
+//Start Server GCelery
 func (this *GCeleryServer) StartCelery() {
 	if this.cronWroker != nil {
 		serv.StartCron(this.cronWroker)
@@ -80,12 +73,13 @@ func (this *GCeleryServer) StartCelery() {
 	}
 }
 
-//注册传输协议protobuf
+//Register Protobuf
 func (this *GCeleryServer) RegisterTransport() {
 	pb1.RegisterBridgeServer(this.Server, &control.GBase{})
 
 }
 
+// Register Cron Wroker to Server
 func (this *GCeleryServer) RegisterCron(cronWroker *serv.Cron) {
 	if this.cronWroker == nil {
 		this.cronWroker = cronWroker
@@ -93,13 +87,14 @@ func (this *GCeleryServer) RegisterCron(cronWroker *serv.Cron) {
 
 }
 
+//Register Sync Long Wroker to Server
 func (this *GCeleryServer) RegisterSync(SyncWroker *serv.SyncWroker) {
 	if this.syncWroker == nil {
 		this.syncWroker = SyncWroker
 	}
 }
 
-//grpc worker
+//Gcelery Task Wroker init
 func (this *GCeleryServer) InitCelery() {
 	control.NewCeleryWorker()
 }
@@ -108,22 +103,22 @@ func (this *GCeleryServer) RegisterCeleryWorker(fs ...func(*task.Request) (error
 	control.RegisterCeleryWorker(fs...)
 }
 
-//cron
+//Cron Wroker
 func (this *GCeleryServer) NewCronWorker() *serv.Cron {
 	return serv.NewCron()
 }
 
-//sync
+//Sync Long wroker
 func (this *GCeleryServer) NewSyncWroker() *serv.SyncWroker {
 	return serv.InitSyncWroker()
 }
 
-//client Pool
+//Client
 func NewClient(bindaddr string) *serv.CeleryClient {
 	return serv.InitClient(bindaddr)
 }
 
-//client One STL Pool
+//STL Client
 func NewSTLClient(bindaddr string, certFile string) *serv.CeleryClient {
 	return serv.InitSTLClient(bindaddr, certFile)
 }
@@ -132,9 +127,3 @@ func NewSTLClient(bindaddr string, certFile string) *serv.CeleryClient {
 func NewTaskResquest() *task.Request {
 	return task.NewResquest()
 }
-
-//cursor
-// func NewCurSor(addr string) serv.Cursor {
-// 	return serv.NewCurSor(addr)
-
-// }
