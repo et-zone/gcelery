@@ -12,15 +12,6 @@ import (
 	// "google.golang.org/grpc"
 )
 
-// func NewCurSor(addr string) Cursor {
-// 	c := &cursor{
-// 		conn: newConn(addr),
-// 	}
-// 	c.cursor = pb.NewBridgeClient(c.conn)
-// 	c.timeout = 5
-// 	return c
-// }
-
 type Cursor interface {
 	Do(req *task.Request) task.Response
 	doContext(ctx context.Context, req *task.Request) task.Response
@@ -38,6 +29,7 @@ func (this *cursor) Do(req *task.Request) task.Response {
 		log.Fatal("Do err, Cursor is nil can not Do function ")
 	}
 	// t := time.Now()
+
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(this.timeout))
 	r, err := this.cursor.Dao(ctx, &pb.Request{ //context.TODO()==default
 		Method:  req.Method,
@@ -90,10 +82,3 @@ func (this *cursor) doContext(ctx context.Context, req *task.Request) task.Respo
 
 	return task.GetPdResponse(r)
 }
-
-// func (this *cursor) Close() {
-// 	client.pool.Lock()
-// 	client.pool.Pool.Put(this.conn)
-// 	this.conn = nil
-// 	this = nil
-// }

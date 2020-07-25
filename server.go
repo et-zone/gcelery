@@ -14,10 +14,6 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
-const (
-	TIMEOUT = 10
-)
-
 var gserver *GCeleryServer
 
 type GCeleryServer struct {
