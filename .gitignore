@@ -1,5 +1,4 @@
 vendor/*
 client/*
 wroker/*
-example/*
 main.go
