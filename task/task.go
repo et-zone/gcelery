@@ -7,11 +7,26 @@ const (
 	UKNOWN_ERR      = "UnKnownError"
 )
 
+/*
+*DIS: task请求
+*Method:task请求目标函数 如myfunc
+*Kwargs:task请求参数。key:val
+*ReqBody:task请求data
+*
+ */
 type Request struct {
 	Method  string            `bson:"method" json:"method"`
 	Kwargs  map[string]string `bson:"kwargs" json:"kwargs"`
 	ReqBody []byte            `bson:"reqBody" json:"reqBody"`
 }
+
+/*
+*DIS: task响应
+*IsOk:task是否成功
+*Status:task状态描述
+*ResBody:task响应data
+*
+ */
 type Response struct {
 	IsOk    bool   `bson:"isOk" json:"isOk"`
 	Status  string `bson:"status" json:"status"`

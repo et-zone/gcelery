@@ -2,10 +2,8 @@ package main
 
 import (
 	// "testing"
-
-	do "github.com/et-zone/gcelery/wroker" //yourself wroker
-
 	"github.com/et-zone/gcelery"
+	do "github.com/et-zone/gcelery/wroker" //yourself wroker
 )
 
 //普通版本
@@ -62,3 +60,25 @@ func main() {
 	TestServer()
 	// TestServerSTL()
 }
+
+//========wroker ，定义task任务 example ，由服务端定义(属于自定义任务)=========
+
+// package worker
+
+// import (
+
+// 	"github.com/et-zone/gcelery/task"
+// )
+
+// //task 任务
+// func Do1(b *task.Request) (err error, r *task.Response) {
+
+// 	r = &task.Response{
+// 		IsOk:    true,
+// 		ResBody: b.ReqBody,
+// 		Status:  "ok",
+// 	}
+
+// 	return
+// }
+//=============================================
