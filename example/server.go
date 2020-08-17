@@ -11,7 +11,7 @@ func TestServer() {
 	addr := ":50051"
 	//初始化服务器
 	server := gcelery.NewCelery(addr) //创建服务器对象
-	//初始化worker //业务==grpc
+	//初始化worker //业务
 	server.InitCelery()
 	//注册worker
 	server.RegisterCeleryWorker(do.Do1)
@@ -36,7 +36,7 @@ func TestServerSTL() {
 	addr := ":50051"
 	//初始化服务器
 	server := gcelery.NewTlsCelery(addr, "/tl/server.crt", "/tl/server.key") //创建服务器对象
-	//初始化worker //业务==grpc
+	//初始化worker //业务
 	server.InitCelery()
 	//注册worker
 	server.RegisterCeleryWorker(do.Do1)

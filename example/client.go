@@ -1,15 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
-
-	// "testing"
-	// "context"
-	// "time"
-	"flag"
-	"strconv"
 
 	"github.com/et-zone/gcelery"
 )
