@@ -6,42 +6,42 @@ import (
 
 var (
 	g          errgroup.Group
-	syncWroker *SyncWroker
+	syncWorker *SyncWorker
 )
 
-type SyncWroker struct {
+type SyncWorker struct {
 	funcs []func()
 }
 
 //异步持续运行的服务对象
-func InitSyncWroker() *SyncWroker {
-	if syncWroker != nil {
-		return syncWroker
+func InitSyncWroker() *SyncWorker {
+	if syncWorker != nil {
+		return syncWorker
 	}
-	SyncWroker := &SyncWroker{}
-	SyncWroker.funcs = []func(){}
-	syncWroker = SyncWroker
-	return syncWroker
+	SyncWorker := &SyncWorker{}
+	SyncWorker.funcs = []func(){}
+	syncWorker = SyncWorker
+	return syncWorker
 }
 
-func (this *SyncWroker) Init(fs ...func()) {
+func (this *SyncWorker) Init(fs ...func()) {
 
 }
 
-func (this *SyncWroker) RegisterWrokers(fs ...func()) {
+func (this *SyncWorker) RegisterWrokers(fs ...func()) {
 	for _, f := range fs {
 		this.funcs = append(this.funcs, f)
 	}
 }
 
-func (this *SyncWroker) start() {
+func (this *SyncWorker) start() {
 	for _, fun := range this.funcs {
 		go fun()
 	}
 
 }
 
-func StartSync(syncWroker *SyncWroker) {
-	syncWroker.start()
+func StartSync(syncWorker *SyncWorker) {
+	syncWorker.start()
 
 }

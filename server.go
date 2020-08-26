@@ -19,8 +19,8 @@ var gserver *GCeleryServer
 type GCeleryServer struct {
 	Server     *grpc.Server
 	listen     net.Listener
-	syncWroker *serv.SyncWroker
-	cronWroker *serv.Cron
+	syncWorker *serv.SyncWorker
+	cronWorker *serv.Cron
 }
 
 //New Server
@@ -58,11 +58,11 @@ func NewTlsCelery(address string, cretFile string, key string) *GCeleryServer {
 
 //Start Server GCelery
 func (this *GCeleryServer) StartCelery() {
-	if this.cronWroker != nil {
-		serv.StartCron(this.cronWroker)
+	if this.cronWorker != nil {
+		serv.StartCron(this.cronWorker)
 	}
-	if this.syncWroker != nil {
-		serv.StartSync(this.syncWroker)
+	if this.syncWorker != nil {
+		serv.StartSync(this.syncWorker)
 	}
 	if err := this.Server.Serve(this.listen); err != nil {
 		log.Fatalf("failed to serve: %v", err)
@@ -76,17 +76,17 @@ func (this *GCeleryServer) RegisterTransport() {
 }
 
 // Register Cron Wroker to Server
-func (this *GCeleryServer) RegisterCron(cronWroker *serv.Cron) {
-	if this.cronWroker == nil {
-		this.cronWroker = cronWroker
+func (this *GCeleryServer) RegisterCron(cronWorker *serv.Cron) {
+	if this.cronWorker == nil {
+		this.cronWorker = cronWorker
 	}
 
 }
 
 //Register Sync Long Wroker to Server
-func (this *GCeleryServer) RegisterSync(SyncWroker *serv.SyncWroker) {
-	if this.syncWroker == nil {
-		this.syncWroker = SyncWroker
+func (this *GCeleryServer) RegisterSync(SyncWorker *serv.SyncWorker) {
+	if this.syncWorker == nil {
+		this.syncWorker = SyncWorker
 	}
 }
 
@@ -105,7 +105,7 @@ func (this *GCeleryServer) NewCronWorker() *serv.Cron {
 }
 
 //Sync Long wroker
-func (this *GCeleryServer) NewSyncWroker() *serv.SyncWroker {
+func (this *GCeleryServer) NewSyncWroker() *serv.SyncWorker {
 	return serv.InitSyncWroker()
 }
 

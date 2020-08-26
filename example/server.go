@@ -3,7 +3,7 @@ package main
 import (
 	// "testing"
 	"github.com/et-zone/gcelery"
-	do "github.com/et-zone/gcelery/wroker" //yourself wroker
+	do "github.com/et-zone/gcelery/worker" //yourself worker
 )
 
 //普通版本

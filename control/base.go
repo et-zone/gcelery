@@ -19,10 +19,10 @@ func (s *GBase) Dao(ctx context.Context, in *pb.Request) (*pb.Response, error) {
 	err, b := s.BaseFunc(in, GetCeleryWorker(in.Method))
 	// log.Println(time.Since(t))
 	if err != nil {
-		return &pb.Response{Status: "false", ResBody: b.ResBody}, err
+		return &pb.Response{IsOk: false, Status: "req fail", ResBody: b.ResBody}, err
 	}
 	// return &pb.Response{Status: "111===" + in.Method + " b:" + string(b)}, nil
-	return &pb.Response{Status: "success", ResBody: b.ResBody}, nil
+	return &pb.Response{IsOk: true, Status: "req success", ResBody: b.ResBody}, nil
 
 }
 

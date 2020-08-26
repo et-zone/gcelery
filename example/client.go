@@ -16,7 +16,8 @@ func TestPool1() { // -t 10
 	flag.Parse()
 	size, _ := strconv.Atoi(*flg)
 	fmt.Println("worker :", size)
-	addr := "172.17.0.14:50051"
+	addr := "127.0.0.1:50051"
+	// addr := "172.17.0.14:50051"
 	// addr := "172.17.0.3:50051"
 	// addr := "49.232.190.114:50051"
 	defaultMethod := "Do1"
@@ -60,7 +61,7 @@ func TestPool1() { // -t 10
 
 	// fmt.Println(msg.Status, string(msg.ResBody))
 
-	time.Sleep(time.Second * 15)
+	time.Sleep(time.Second * 1)
 }
 
 //连接池+STL 安全
